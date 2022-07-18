@@ -1,26 +1,38 @@
 import React, { useState, useEffect} from 'react';
 import TodoForm from './TodoForm';
 import Todo from './Todo';
-import { useSelector } from "react-redux";
-import { useDispatch } from "react-redux";
-import Count from "../actions/listaActions";
+import {useSelector, useDispatch} from 'react-redux'
+import { COUNTER_KEY } from "../redux/counterRedux/counter.reducer";
+import { increaseCounter, decreaseCounter } from "../redux/counterRedux/counter.actions";
+
+
 
 
 function TodoList() {
+  
     const [todos, setTodos] = useState([]);
-    const dispatch = useDispatch();
-    const listagem = useSelector((state) => state.lista.listax);
+    
     const[conc,setConc] = useState(0)
     const[nconc,setNconc] = useState(0)
 
+    let dispatch = useDispatch()
    
+    let increaseBtn = () =>{
+        dispatch(increaseCounter())
+    }   
     
-
+    let decreaseBtn = () =>{
+        dispatch(decreaseCounter())
+    }
+       
+    let viewCounter = useSelector((state) =>{
+      return state[COUNTER_KEY]
+     })
+     
     useEffect(
     () => {
-     krn();    
-     console.log(Object.keys(todos).length) 
-
+     krn();          
+     
     }, // eslint-disable-next-line
     []
   );
@@ -28,6 +40,7 @@ function TodoList() {
   const addTodo = todo => {
        const armazenar = JSON.stringify(todo);
        localStorage.setItem(todo.id, armazenar);
+        increaseBtn()
     krn()
  }; 
  
@@ -48,6 +61,7 @@ function TodoList() {
   
   const removeTodo = id => {
     localStorage.removeItem(id);
+     decreaseBtn()
     krn()
   };
 
@@ -82,8 +96,7 @@ function TodoList() {
     
   };
   
-  
-  async function krn() {
+    async function krn() {
     const keys = Object.keys(localStorage);
     const rec = keys.filter(checkar);
 
@@ -94,25 +107,23 @@ function TodoList() {
     const newTodos =  rec.map((item) => {
           return JSON.parse(localStorage.getItem(item));
     });
-     
     
     let num = 0;
     let numc = 0;
 
-     newTodos.map((item) => { 
+    // eslint-disable-next-line 
+    newTodos.map((item) => { 
       if (item.isComplete === true) {
          num++
       }else{
          numc++
       }
     });
-   
+  
    setConc(num)
    setNconc(numc)
-    
-    setTodos(newTodos);
-     await dispatch(Count(newTodos));
-  
+   setTodos(newTodos);
+ 
   }
   
 
@@ -120,14 +131,15 @@ function TodoList() {
     <>
       <h1>Todo list</h1>
       <p className="dot">
-        Total de tarefas:  {Object.keys(todos).length}
-      </p>
+        Total de tarefas:  {viewCounter.count}
+           </p>
       <p className="dot">
         Total de tarefas Concluidas:  {conc}
       </p>
       <p className="dot">
         Total de tarefas não Concluidas:  {nconc}
       </p>
+     
       <TodoForm onSubmit={addTodo} /> 
       <Todo
         todos={todos}
